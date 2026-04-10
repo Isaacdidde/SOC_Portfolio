@@ -302,6 +302,7 @@ GET /dvwa/vulnerabilities/sqli/?id=1'%20UNION%20SELECT%20database()
 * Manual analysis helps build detection intuition
 * Attack patterns are easily identifiable with proper observation
 
+> Note: IP addresses have been partially masked (192.168.0.xxx) for privacy while preserving attack patterns for analysis.
 ---
 
 ## 🏁 Conclusion
