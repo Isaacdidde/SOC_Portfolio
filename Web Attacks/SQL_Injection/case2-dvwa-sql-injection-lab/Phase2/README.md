@@ -1,332 +1,229 @@
-# 🔴 Phase 2: SQL Injection Attack & Log Analysis (Purple Team)
+# Phase 2 & 3 — SQL Injection Attack & Log Analysis (Purple Team)
 
-## 📌 Overview
-
-In this phase, SQL Injection (SQLi) attacks were performed on the DVWA application to simulate real-world exploitation techniques. Simultaneously, web server logs were monitored to analyze how these attacks appear from a defender’s (SOC analyst) perspective.
-
-This phase bridges the gap between **offensive security (attack execution)** and **defensive monitoring (log analysis)**.
+**Project:** SQL Injection Detection Homelab  
+**Author:** Didde Isaac | SOC Analyst Portfolio  
+**Phase Focus:** Manual Attack Execution + Real-Time Log Analysis
 
 ---
 
-## 🎯 Objectives
+## Overview
 
-* Perform manual SQL Injection attacks
-* Understand how SQL queries are manipulated
-* Identify vulnerabilities in web applications
-* Monitor Apache logs in real-time
-* Detect attack patterns from logs
+This phase covers both the offensive execution of SQL Injection attacks against DVWA and the simultaneous defensive analysis of how those attacks appear in Apache web server logs. It bridges the gap between attacker behavior and SOC analyst detection workflow.
 
 ---
 
-## 🧰 Tools & Environment
+## Objectives
 
-| Role       | Tool                  |
-| ---------- | --------------------- |
-| Attacker   | Kali Linux            |
-| Target     | DVWA on Ubuntu Server |
-| Monitoring | Apache access logs    |
-| Method     | Manual SQL Injection  |
-
----
-
-## ⚙️ Lab Preparation
-
-### ✅ DVWA Configuration
-
-* Logged into DVWA
-* Set security level to:
-
-  ```
-  DVWA Security → LOW
-  ```
+- Perform manual SQL Injection attacks on DVWA
+- Understand how SQL queries are manipulated by payloads
+- Monitor Apache logs in real time during attack execution
+- Identify and document attack patterns from a defender perspective
+- Map observed techniques to MITRE ATT&CK
 
 ---
 
-### 🛡️ Log Monitoring Setup
+## Tools & Environment
 
-On Ubuntu server:
+| Role | Tool |
+|---|---|
+| Attacker OS | Kali Linux |
+| Target Application | DVWA on Ubuntu Server |
+| Log Monitoring | Apache `access.log` |
+| Method | Manual SQL Injection |
 
-```bash id="xv0qsn"
+---
+
+## Lab Preparation
+
+**DVWA Security Level:**
+```
+DVWA Security → LOW
+```
+
+**Real-time log monitoring on Ubuntu Server:**
+```bash
 tail -f /var/log/apache2/access.log
 ```
 
-This allows real-time observation of incoming requests.
+---
+
+## Attack Execution
 
 ---
 
-## 🔴 Attack Execution
-
----
-
-### 🧪 Attack 1: Authentication Bypass
+### Attack 1 — Authentication Bypass
 
 **Payload:**
-
-```id="v3qz8y"
+```
 1' OR '1'='1
 ```
 
----
-
-### 🧠 Explanation
+**Query Manipulation:**
 
 Original query:
-
-```sql id="o6z36r"
+```sql
 SELECT * FROM users WHERE id = '1';
 ```
 
 Injected query:
-
-```sql id="b4jk5l"
+```sql
 SELECT * FROM users WHERE id = '1' OR '1'='1';
 ```
 
-👉 Always evaluates TRUE → returns all records
+The condition always evaluates to TRUE, returning all records.
 
----
+**Result:** Multiple user records displayed — authentication bypass successful.
 
-### ✅ Result
-
-* Multiple user records displayed
-* Successful SQL Injection
-
----
-
-### 🛡️ Log Evidence
-
-```id="n3fw6y"
+**Log Evidence:**
+```
 GET /dvwa/vulnerabilities/sqli/?id=1'%20OR%20'1'%3D'1 HTTP/1.1
 ```
 
----
-
-### 🔍 Detection Insight
-
-* Presence of `' OR`
-* Logical bypass condition
-* Highly suspicious input pattern
+**Detection Insight:**
+- Presence of `' OR` indicates logical bypass
+- Highly suspicious input pattern — high confidence SQLi indicator
 
 ---
 
-## 🧪 Attack 2: Column Enumeration
+### Attack 2 — Column Enumeration
 
----
-
-### Payloads:
-
-```id="ck7dp7"
+**Payloads:**
+```
 1' ORDER BY 1 --
 1' ORDER BY 2 --
 ```
 
----
+**Observation:**
 
-### ✅ Observation
+| Payload | Response |
+|---|---|
+| `ORDER BY 1` | Success — page loads normally |
+| `ORDER BY 2` | Error — HTTP 500 |
 
-* `ORDER BY 1` → Works
-* `ORDER BY 2` → Error (HTTP 500)
+**Conclusion:** Column count = **1**
 
----
-
-### 🎯 Conclusion
-
-* Number of columns = **1**
-
----
-
-### 🛡️ Log Evidence
-
-```id="9c8v7p"
+**Log Evidence:**
+```
 ORDER BY 1
 ORDER BY 2
 ```
 
----
-
-### 🔍 Detection Insight
-
-* Sequential probing pattern
-* Common enumeration technique used by attackers
+**Detection Insight:**
+- Sequential `ORDER BY` probing is a classic enumeration pattern
+- HTTP 500 errors triggered by injection payloads are high-value alert candidates
 
 ---
 
-## 🧪 Attack 3: Data Extraction using UNION
+### Attack 3 — Database Name Extraction
 
----
-
-### Payload:
-
-```id="b0k6xp"
+**Payload:**
+```
 1' UNION SELECT database() --
 ```
 
----
+**Result:** Database name revealed — `dvwa`
 
-### ✅ Result
-
-* Database name displayed (`dvwa`)
-
----
-
-### 🛡️ Log Evidence
-
-```id="ksm7x4"
+**Log Evidence:**
+```
 UNION SELECT database()
 ```
 
----
-
-### 🔍 Detection Insight
-
-* `UNION SELECT` is a strong SQL Injection indicator
-* Used for extracting sensitive data
+**Detection Insight:**
+- `UNION SELECT` is one of the strongest SQLi indicators in HTTP logs
+- Combined with function calls like `database()`, confirms active data extraction
 
 ---
 
-## 🧪 Attack 4: Extract Database User
+### Attack 4 — Database User Extraction
 
----
-
-### Payload:
-
-```id="q2tfv1"
+**Payload:**
+```
 1' UNION SELECT user() --
 ```
 
----
-
-### ✅ Result
-
-* Displays current DB user (`dvwa@localhost`)
+**Result:** Current DB user revealed — `dvwa@localhost`
 
 ---
 
-## 🧪 Attack 5: Extract Database Version
+### Attack 5 — Database Version Extraction
 
----
-
-### Payload:
-
-```id="4m31kb"
+**Payload:**
+```
 1' UNION SELECT version() --
 ```
 
----
-
-### ✅ Result
-
-* Displays MySQL version
+**Result:** MySQL version string revealed.
 
 ---
 
-## 🛡️ Log Analysis Summary
+## Log Analysis Summary
 
----
+### Observed Attack Patterns
 
-### 🔍 Observed Patterns
+| Pattern | Meaning | Confidence |
+|---|---|---|
+| `' OR` | Authentication bypass | High |
+| `UNION SELECT` | Data extraction | High |
+| `ORDER BY` | Column enumeration | Medium |
+| `%20`, `%27`, `%3D` | URL-encoded payloads | Medium |
 
-| Pattern        | Meaning               |
-| -------------- | --------------------- |
-| `' OR`         | Authentication bypass |
-| `UNION SELECT` | Data extraction       |
-| `ORDER BY`     | Column enumeration    |
-| `%20`, `%27`   | URL encoding          |
+### Sample Log Entries
 
----
-
-### 📄 Sample Logs
-
-```id="7y8c1u"
-GET /dvwa/vulnerabilities/sqli/?id=1'%20OR%20'1'%3D'1
-GET /dvwa/vulnerabilities/sqli/?id=1'%20UNION%20SELECT%20database()
+```
+GET /dvwa/vulnerabilities/sqli/?id=1'%20OR%20'1'%3D'1 HTTP/1.1
+GET /dvwa/vulnerabilities/sqli/?id=1'%20UNION%20SELECT%20database() HTTP/1.1
+GET /dvwa/vulnerabilities/sqli/?id=1'%20ORDER%20BY%201-- HTTP/1.1
+GET /dvwa/vulnerabilities/sqli/?id=1'%20UNION%20SELECT%20user() HTTP/1.1
 ```
 
----
-
-## 🧠 Attacker vs Defender Mapping
-
-| Attacker Action   | Defender Observation |
-| ----------------- | -------------------- |
-| Inject payload    | Logged in access.log |
-| Enumerate columns | ORDER BY sequence    |
-| Extract data      | UNION SELECT usage   |
-
----
-## 🧠 MITRE ATT&CK Mapping
-
-The observed attack techniques were mapped to the MITRE ATT&CK framework as follows:
-
-| Technique                         | ID    | Description                                        |
-| --------------------------------- | ----- | -------------------------------------------------- |
-| Exploit Public-Facing Application | T1190 | SQL Injection attack against DVWA                  |
-| System Information Discovery      | T1082 | Column enumeration using ORDER BY                  |
-| Data from Local System            | T1005 | Extracting database information using UNION SELECT |
+> IP addresses partially masked (192.168.0.xxx) for privacy. Attack patterns preserved for analysis.
 
 ---
 
-### 🔍 Analysis
+## Attacker vs. Defender Mapping
 
-* SQL Injection is categorized under **Initial Access / Exploitation**
-* Enumeration techniques help attackers understand backend structure
-* Data extraction confirms successful compromise of application
-
----
-
-
-## ⚠️ Challenges Faced & Fixes
-
----
-
-### ❌ 1. HTTP 500 Error during UNION
-
-**Cause:**
-
-* Incorrect column count in UNION query
-
-**Fix:**
-
-* Used `ORDER BY` to determine column count
+| Attacker Action | Defender Observation |
+|---|---|
+| Inject authentication bypass | `' OR` pattern in access.log |
+| Enumerate column count | Sequential `ORDER BY` with HTTP 500 error |
+| Extract database name | `UNION SELECT database()` in request |
+| Extract database user | `UNION SELECT user()` in request |
+| Extract DB version | `UNION SELECT version()` in request |
 
 ---
 
-### ❌ 2. Payload Not Displaying Output
+## MITRE ATT&CK Mapping
 
-**Cause:**
-
-* Output column mismatch
-
-**Fix:**
-
-* Adjusted UNION payload to match visible column
-
----
-
-### ❌ 3. URL Encoding Confusion
-
-**Cause:**
-
-* Logs showed encoded values (`%20`, `%27`)
-
-**Fix:**
-
-* Decoded values manually for analysis
+| Technique | ID | Phase | Description |
+|---|---|---|---|
+| Exploit Public-Facing Application | T1190 | Phase 2 (Attack) | Manual SQLi against DVWA login and query pages |
+| System Information Discovery | T1082 | Phase 2 (Attack) | Column enumeration using `ORDER BY` |
+| Data from Local System | T1005 | Phase 2 (Attack) | Database name, user, and version extracted via `UNION SELECT` |
+| Log Enumeration | T1654 | Phase 3 (Detection) | Apache access logs reviewed to identify attack evidence |
+| Network Traffic Analysis | T1040 | Phase 3 (Detection) | HTTP request patterns monitored for SQLi indicators |
 
 ---
 
-## 🧠 Key Learnings
+## Challenges & Fixes
 
-* SQL Injection relies on understanding query structure
-* Even simple payloads can extract sensitive data
-* Logs provide complete visibility of attacker behavior
-* Manual analysis helps build detection intuition
-* Attack patterns are easily identifiable with proper observation
-
-> Note: IP addresses have been partially masked (192.168.0.xxx) for privacy while preserving attack patterns for analysis.
----
-
-## 🏁 Conclusion
-
-This phase successfully demonstrated how SQL Injection attacks are executed and how they appear in web server logs. It provides a strong foundation for transitioning into automated attacks and SIEM-based detection.
+| Issue | Cause | Fix |
+|---|---|---|
+| HTTP 500 error during UNION | Incorrect column count in UNION query | Used `ORDER BY` first to determine column count |
+| Payload not showing output | Output column mismatch | Adjusted UNION payload to match visible output column |
+| URL-encoded values in logs | Browser/tool encodes special characters | Decoded `%20` → space, `%27` → `'`, `%3D` → `=` manually |
 
 ---
+
+## Key Learnings
+
+- SQL Injection relies on understanding query structure — manual testing before automation builds real intuition
+- Even simple payloads can extract sensitive database information
+- Apache logs provide full visibility of attacker behavior in HTTP requests
+- URL encoding is a passive obfuscation technique that shows up clearly in raw logs
+- Sequential error-based patterns (like `ORDER BY` probing) are detectable without a SIEM
+
+---
+
+## Next Phase
+
+**Phase 4 — Automated Attack (sqlmap):** Running sqlmap to generate high-volume attack traffic and comparing automated tool signatures against manually crafted payloads observed in this phase.
