@@ -253,6 +253,26 @@ GET /dvwa/vulnerabilities/sqli/?id=1'%20UNION%20SELECT%20database()
 | Extract data      | UNION SELECT usage   |
 
 ---
+## 🧠 MITRE ATT&CK Mapping
+
+The observed attack techniques were mapped to the MITRE ATT&CK framework as follows:
+
+| Technique                         | ID    | Description                                        |
+| --------------------------------- | ----- | -------------------------------------------------- |
+| Exploit Public-Facing Application | T1190 | SQL Injection attack against DVWA                  |
+| System Information Discovery      | T1082 | Column enumeration using ORDER BY                  |
+| Data from Local System            | T1005 | Extracting database information using UNION SELECT |
+
+---
+
+### 🔍 Analysis
+
+* SQL Injection is categorized under **Initial Access / Exploitation**
+* Enumeration techniques help attackers understand backend structure
+* Data extraction confirms successful compromise of application
+
+---
+
 
 ## ⚠️ Challenges Faced & Fixes
 
