@@ -1,215 +1,162 @@
-# 🛡️ SQL Injection Detection Homelab (Purple Team Project)
+# SQL Injection Detection — Purple Team Homelab
 
-## 📌 Overview
-
-This project demonstrates a complete **end-to-end SQL Injection (SQLi) detection lab** built in a homelab environment. It follows a **Purple Team approach**, combining both offensive (attacker) and defensive (SOC analyst) perspectives.
-
-The lab simulates real-world attack scenarios against a vulnerable web application and analyzes how those attacks are logged, detected, and investigated using security monitoring techniques.
+**Author:** Didde Isaac | SOC Analyst Portfolio  
+**Focus:** Web Attack Detection, Log Analysis & SIEM Monitoring  
+**Approach:** Purple Team (Offensive Simulation + Defensive Detection)
 
 ---
 
-## 🎯 Project Objectives
+## Overview
 
-* Build a realistic web attack lab environment
-* Perform SQL Injection attacks manually and using automation tools
-* Analyze web server logs for attack patterns
-* Develop detection mindset similar to a SOC analyst
-* Integrate logs into a SIEM for automated detection (Wazuh)
-* Document real-world attack → detection → response workflow
+This project documents a complete end-to-end SQL Injection (SQLi) detection lab built in a homelab environment. It follows a **Purple Team methodology** — combining attacker simulation with SOC analyst detection workflows — to demonstrate real-world threat identification, log analysis, and SIEM-based alerting.
 
 ---
 
-## 🧠 Purple Team Methodology
+## Objectives
 
-This project follows a structured cycle:
-
-1. **Attack Simulation (Red Team)**
-2. **Log Analysis (Blue Team)**
-3. **Detection Engineering (SOC)**
-4. **Improvement & Re-testing (Purple Team Loop)**
-
----
-
-## 🏗️ Lab Architecture
-
-### 💻 Components
-
-* **Attacker Machine**
-
-  * Kali Linux
-  * Tools: Browser, sqlmap
-
-* **Target Server**
-
-  * Ubuntu Server
-  * DVWA (Damn Vulnerable Web Application)
-  * Apache Web Server
-  * MySQL Database
-
-* **Detection Layer (Planned)**
-
-  * Wazuh SIEM
-  * Log ingestion & alerting
+- Build a realistic web attack lab using DVWA on a LAMP stack
+- Perform SQL Injection attacks manually and via automation (sqlmap)
+- Analyze Apache access logs to identify attack patterns
+- Forward logs to a SIEM (Wazuh) for automated detection
+- Engineer custom detection rules and reduce false positives
+- Document a complete attack → detection → response workflow
 
 ---
 
-## 🌐 Network Design
+## Lab Architecture
 
-* Multi-machine setup using VirtualBox / physical laptops
-* Same network (Bridged / LAN)
-* Real IP-based communication (not localhost)
+| Role | OS | Tools / Services |
+|---|---|---|
+| Attacker Machine | Kali Linux | Browser, sqlmap |
+| Target Server | Ubuntu Server | DVWA, Apache, MySQL |
+| Detection Layer | Ubuntu Server | Wazuh SIEM |
 
----
-
-## 🧰 Tools & Technologies
-
-| Category        | Tool              |
-| --------------- | ----------------- |
-| Attacker OS     | Kali Linux        |
-| Target OS       | Ubuntu Server     |
-| Vulnerable App  | DVWA              |
-| Web Server      | Apache            |
-| Database        | MySQL             |
-| Automation Tool | sqlmap            |
-| SIEM            | Wazuh             |
-| Logs            | Apache access.log |
+**Network:** Multi-machine setup via VirtualBox / physical hardware. Bridged/LAN networking with real IP-based communication.
 
 ---
 
-## ⚙️ Project Phases
+## Tools & Technologies
+
+| Category | Tool |
+|---|---|
+| Attacker OS | Kali Linux |
+| Target OS | Ubuntu Server |
+| Vulnerable App | DVWA |
+| Web Server | Apache |
+| Database | MySQL |
+| Automation | sqlmap |
+| SIEM | Wazuh |
+| Log Source | Apache `access.log` |
 
 ---
 
-### 🔴 Phase 1: Environment Setup
+## Purple Team Methodology
 
-* Installed Ubuntu Server
-* Configured Apache, MySQL, PHP (LAMP stack)
-* Deployed DVWA
-* Configured database connection
-* Verified application accessibility
+```
+Attack Simulation (Red)  →  Log Analysis (Blue)  →  Detection Engineering (SOC)
+        ↑                                                        |
+        └──────────────── Purple Team Loop ─────────────────────┘
+```
 
----
-
-### 🔴 Phase 2: Manual SQL Injection (Attacker Perspective)
-
-* Performed authentication bypass
-* Identified number of columns using `ORDER BY`
-* Used `UNION SELECT` for data extraction
-* Extracted:
-
-  * Database name
-  * Database user
-  * Database version
+Each cycle re-runs attacks, validates detection accuracy, and improves rules.
 
 ---
 
-### 🛡️ Phase 3: Log Analysis (Defender Perspective)
+## Project Phases
 
-* Monitored Apache logs using:
+### Phase 1 — Environment Setup
+- Installed Ubuntu Server and configured LAMP stack (Apache, MySQL, PHP)
+- Deployed DVWA and verified application accessibility from attacker machine
 
-  ```bash
-  tail -f /var/log/apache2/access.log
-  ```
-* Identified malicious patterns:
+### Phase 2 — Manual SQL Injection (Red Team)
+- Performed authentication bypass using `' OR '1'='1`
+- Enumerated columns via `ORDER BY`
+- Extracted database name, user, and version using `UNION SELECT`
 
-  * `' OR '1'='1`
-  * `UNION SELECT`
-  * `ORDER BY`
-* Observed URL encoding in logs (`%20`, `%27`)
-
----
-
-### ⚔️ Phase 4: Automated Attack
-
-* Use sqlmap to automate SQL Injection
-* Generate high-volume attack traffic
-* Observe patterns in logs
-
----
-
-### 🛡️ Phase 5: SIEM Integration 
-
-* Install Wazuh SIEM
-* Forward Apache logs to Wazuh
-* Visualize attacks in dashboard
-* Detect SQL Injection patterns
-
----
-
-### 🧠 Phase 6: Detection Engineering
-
-* Create custom detection rules
-* Identify indicators of compromise (IoCs)
-* Reduce false positives
-
----
-
-### 🔁 Phase 7: Purple Team Loop
-
-* Re-run attacks
-* Validate detection accuracy
-* Improve rules and monitoring
-
----
-
-## 🔍 Key SQL Injection Techniques Demonstrated
-
-* Authentication bypass
-* Boolean-based injection
-* UNION-based injection
-* Column enumeration
-
----
-
-## 🛡️ Detection Indicators
-
-| Indicator        | Description           |
-| ---------------- | --------------------- |
-| `' OR`           | Authentication bypass |
-| `UNION SELECT`   | Data extraction       |
-| `ORDER BY`       | Column discovery      |
-| Encoded payloads | Obfuscated attacks    |
-
----
-
-## 📂 Project Structure
-
+### Phase 3 — Log Analysis (Blue Team)
+Monitored Apache logs in real time:
 ```bash
-web-detection/
-│── case1-letsdefend/
-│── case2-dvwa-sql-injection-lab/
-│── README.md  <-- (this file)
+tail -f /var/log/apache2/access.log
+```
+Identified malicious patterns including `UNION SELECT`, `ORDER BY`, and URL-encoded payloads (`%27`, `%20`).
+
+### Phase 4 — Automated Attack (sqlmap)
+- Ran sqlmap to automate injection and generate high-volume attack traffic
+- Observed how automated tool signatures differ from manual payloads in logs
+
+### Phase 5 — SIEM Integration (Wazuh) *(In Progress)*
+- Install Wazuh agent on target server
+- Forward Apache logs to Wazuh manager
+- Visualize attack patterns on the Wazuh dashboard
+
+### Phase 6 — Detection Engineering
+- Write custom Wazuh rules to detect SQLi patterns
+- Define Indicators of Compromise (IOCs)
+- Tune rules to reduce false positives
+
+### Phase 7 — Purple Team Loop
+- Re-run attack scenarios after rule deployment
+- Validate detection rate and coverage
+- Iterate and improve
 
 ---
 
-## 🧠 Key Learnings
+## MITRE ATT&CK Mapping
 
-* SQL Injection is both simple and powerful
-* Logs provide critical visibility into attacks
-* Manual analysis builds strong detection intuition
-* SIEM tools automate but require understanding of patterns
-* Purple team approach improves both offense and defense skills
-
----
-
-## 🚀 Future Enhancements
-
-* Add Web Application Firewall (WAF)
-* Simulate real-world attack scenarios
-* Expand to XSS and other web attacks
-* Integrate alerting and incident response workflows
+| Technique | ID | Description |
+|---|---|---|
+| Exploit Public-Facing Application | T1190 | SQL Injection via DVWA |
+| OS Command Execution (via SQLi) | T1059 | Potential command execution through DB |
+| Data from Local System | T1005 | Database enumeration and extraction |
 
 ---
 
-## 🏁 Conclusion
+## Detection Indicators (IOCs)
 
-This project provides a comprehensive understanding of SQL Injection from both attacker and defender perspectives. It bridges the gap between penetration testing and SOC operations, making it highly relevant for real-world cybersecurity roles.
+| Indicator | Pattern | Threat |
+|---|---|---|
+| Authentication Bypass | `' OR '1'='1` | Login bypass |
+| Data Extraction | `UNION SELECT` | Column-based data dump |
+| Column Enumeration | `ORDER BY [n]--` | Pre-extraction reconnaissance |
+| Encoded Payloads | `%27`, `%20`, `%3D` | Obfuscated injection |
+
+---
+
+## Key Learnings
+
+- Manual SQL Injection builds intuition that tools like sqlmap can't replace
+- Apache logs expose attack patterns clearly once you know what to look for
+- URL encoding is a common obfuscation technique visible in raw log entries
+- SIEM rules must account for both raw and encoded payload variants
+- Purple Team loops are more effective than single red or blue exercises
 
 ---
 
-## 👨‍💻 Author
+## Repository Structure
 
-* SOC Analyst Homelab Project
-* Focus: Web Attack Detection & SIEM Monitoring
+```
+SOC_Portfolio/
+└── web-detection/
+    ├── case1-letsdefend/          # LetsDefend alert investigation write-up
+    ├── case2-dvwa-sql-injection-lab/  # This lab (setup, logs, rules)
+    └── README.md
+```
 
 ---
+
+## Future Enhancements
+
+- [ ] Complete Wazuh SIEM integration and share custom rule set
+- [ ] Add Web Application Firewall (WAF) — ModSecurity
+- [ ] Expand to XSS and Command Injection scenarios
+- [ ] Integrate automated alerting and incident response playbook
+- [ ] Add pcap captures for network-level evidence
+
+---
+
+## Connect
+
+If you're a recruiter or fellow learner, feel free to connect:
+
+- **LinkedIn:** www.linkedin.com/in/didde-isaac
+- **GitHub:** [github.com/Isaacdidde](https://github.com/Isaacdidde)
