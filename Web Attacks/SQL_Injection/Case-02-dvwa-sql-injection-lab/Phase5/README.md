@@ -712,7 +712,7 @@ Under-resourced VMs cause Indexer JVM crashes and dashboard timeouts. SIEM stabi
 
 ## Author
 
-**Isaac James**
+**Didde Isaac**
 SOC Analyst | Cybersecurity Enthusiast
 
 *Part of an ongoing SOC Home Lab series covering the full attack-detect-respond pipeline.*
