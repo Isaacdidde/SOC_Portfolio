@@ -225,3 +225,6 @@ Given the potential for remote command execution and system compromise, the inci
 * HTTP 200 responses may indicate successful payload delivery and should be investigated carefully.
 * Command injection incidents frequently require escalation because of the risk of full server compromise.
 * Reviewing request bodies, parameters, and server responses is essential during web attack investigations.
+
+
+## Full Documentation and investingation is available at: https://app.letsdefend.io/case-management/casedetail/IsaacD/118
