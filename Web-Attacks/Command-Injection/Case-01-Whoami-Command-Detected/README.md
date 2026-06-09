@@ -228,3 +228,5 @@ Given the potential for remote command execution and system compromise, the inci
 
 
 ## Full Documentation and investingation is available at: https://app.letsdefend.io/case-management/casedetail/IsaacD/118
+
+## Visit My Medium detailed walkthrough of this investigation https://medium.com/@diddeisaac/soc168-walkthrough-how-i-investigated-a-real-command-injection-attack-whoami-in-http-request-body-11b1f060efad
