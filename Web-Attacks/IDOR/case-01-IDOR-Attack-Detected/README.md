@@ -222,3 +222,5 @@ Although no operating system compromise was identified, evidence suggests unauth
 - Different response sizes can indicate exposure of distinct records.
 - IDOR attacks often leave no evidence in terminal history.
 - Application logs are critical for validating unauthorized access.
+
+## Visit https://app.letsdefend.io/case-management/casedetail/IsaacD/119 for detailed investigation report on letsdefend.
